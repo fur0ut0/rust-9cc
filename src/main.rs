@@ -1,6 +1,14 @@
 use std;
 
-type Integer = i32;
+mod rust_9cc;
+
+use rust_9cc::common::Integer;
+use rust_9cc::common::Operator;
+
+use rust_9cc::tokenizer::Tokenizer;
+use rust_9cc::tokenizer::Token;
+use rust_9cc::tokenizer::TokenKind;
+
 
 fn main() {
     let arg = std::env::args().nth(1);
@@ -11,58 +19,47 @@ fn main() {
         }
     };
 
-    let mut remained = code.as_str();
+    let mut tokenizer = Tokenizer { expr: &code };
 
     println!(".intel_syntax noprefix");
     println!(".globl main");
     println!("main:");
 
-    let integer;
-    (integer, remained) = consume_number(remained).unwrap();
-    println!("  mov rax, {}", integer);
-    while !remained.is_empty() {
-        let (head, tail) = consume_reserved(remained).unwrap();
-        match head {
-            "+" => {
-                let integer;
-                (integer, remained) = consume_number(tail).unwrap();
-                println!("  add rax, {}", integer);
+    let token = tokenizer.next().unwrap();
+    println!("  mov rax, {}", expect_number(token));
+    loop {
+        let token = match tokenizer.next() {
+            Some(token) => token,
+            None => break,
+        };
+
+        match token.kind {
+            TokenKind::Reserved(operator) => match operator {
+                Operator::Plus => {
+                    let token = tokenizer.next().unwrap();
+                    println!("  add rax, {}", expect_number(token));
+                },
+                Operator::Minus => {
+                    let token = tokenizer.next().unwrap();
+                    println!("  sub rax, {}", expect_number(token));
+                },
+            },
+            _ => {
+                panic!("Unexpected token: {:?}", token);
             }
-            "-" => {
-                let integer;
-                (integer, remained) = consume_number(tail).unwrap();
-                println!("  sub rax, {}", integer);
-            }
-            _ => (),
         }
     }
 
     println!("  ret");
 }
 
-fn consume_reserved(expr: &str) -> Option<(&str, &str)> {
-    static TOKENS: &'static [&str] = &["+", "-"];
-    for token in TOKENS {
-        if expr.starts_with(token) {
-            return Some(expr.split_at(token.len()));
-        }
-    }
-    None
-}
-
-fn consume_number(expr: &str) -> Option<(Integer, &str)> {
-    let index = expr.bytes().position(|b| !b.is_ascii_digit()).unwrap_or(expr.len());
-    if index == 0 {
-        return None
-    }
-    Some(expr.split_at(index)).map(|(head, tail)| (to_integer(head), tail))
-}
-
-fn to_integer(expr: &str) -> Integer {
-    match expr.parse::<Integer>() {
-        Ok(v) => v,
-        Err(e) => {
-            panic!("Error: Not integer expression: {expr} ({e})");
+fn expect_number(token: Token) -> Integer {
+    match token {
+        Token { kind: TokenKind::Number(i), .. } => {
+            return i;
+        },
+        _ => {
+            panic!("Not a number: {}", token.expr);
         }
     }
 }
