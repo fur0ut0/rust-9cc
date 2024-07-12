@@ -30,11 +30,11 @@ fn main() {
                 rust_9cc::Operator::Plus => {
                     let token = tokenizer.next().unwrap();
                     println!("  add rax, {}", expect_number(token));
-                },
+                }
                 rust_9cc::Operator::Minus => {
                     let token = tokenizer.next().unwrap();
                     println!("  sub rax, {}", expect_number(token));
-                },
+                }
             },
             _ => {
                 panic!("Unexpected token: {:?}", token);
@@ -47,9 +47,12 @@ fn main() {
 
 fn expect_number(token: rust_9cc::Token) -> rust_9cc::Integer {
     match token {
-        rust_9cc::Token { kind: rust_9cc::TokenKind::Number(i), .. } => {
+        rust_9cc::Token {
+            kind: rust_9cc::TokenKind::Number(i),
+            ..
+        } => {
             return i;
-        },
+        }
         _ => {
             panic!("Not a number: {}", token.expr);
         }

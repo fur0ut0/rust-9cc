@@ -33,7 +33,6 @@ pub struct Token<'a> {
     pub expr: &'a str,
 }
 
-
 #[derive(Debug)]
 pub enum TokenKind {
     Reserved(Operator),
