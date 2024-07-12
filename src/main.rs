@@ -2,14 +2,6 @@ use std;
 
 mod rust_9cc;
 
-use rust_9cc::common::Integer;
-use rust_9cc::common::Operator;
-
-use rust_9cc::tokenizer::Tokenizer;
-use rust_9cc::tokenizer::Token;
-use rust_9cc::tokenizer::TokenKind;
-
-
 fn main() {
     let arg = std::env::args().nth(1);
     let code = match arg {
@@ -19,7 +11,7 @@ fn main() {
         }
     };
 
-    let mut tokenizer = Tokenizer { expr: &code };
+    let mut tokenizer = rust_9cc::Tokenizer { expr: &code };
 
     println!(".intel_syntax noprefix");
     println!(".globl main");
@@ -34,12 +26,12 @@ fn main() {
         };
 
         match token.kind {
-            TokenKind::Reserved(operator) => match operator {
-                Operator::Plus => {
+            rust_9cc::TokenKind::Reserved(operator) => match operator {
+                rust_9cc::Operator::Plus => {
                     let token = tokenizer.next().unwrap();
                     println!("  add rax, {}", expect_number(token));
                 },
-                Operator::Minus => {
+                rust_9cc::Operator::Minus => {
                     let token = tokenizer.next().unwrap();
                     println!("  sub rax, {}", expect_number(token));
                 },
@@ -53,9 +45,9 @@ fn main() {
     println!("  ret");
 }
 
-fn expect_number(token: Token) -> Integer {
+fn expect_number(token: rust_9cc::Token) -> rust_9cc::Integer {
     match token {
-        Token { kind: TokenKind::Number(i), .. } => {
+        rust_9cc::Token { kind: rust_9cc::TokenKind::Number(i), .. } => {
             return i;
         },
         _ => {
