@@ -44,7 +44,7 @@ fn expr_to_operator(expr: &str) -> Operator {
         "+" => Operator::Plus,
         "-" => Operator::Minus,
         _ => {
-            panic!("Not a valid expression for operator: {}", expr);
+            unreachable!("Not a valid expression for operator: {}", expr);
         }
     }
 }
@@ -78,7 +78,7 @@ fn to_integer(expr: &str) -> Integer {
     match expr.parse::<Integer>() {
         Ok(v) => v,
         Err(e) => {
-            panic!("Error: Not integer expression: {expr} ({e})");
+            unreachable!("Error: Not integer expression: {expr} ({e})");
         }
     }
 }
