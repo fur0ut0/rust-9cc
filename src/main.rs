@@ -46,11 +46,8 @@ fn main() {
 }
 
 fn expect_number(token: rust_9cc::Token) -> rust_9cc::Integer {
-    match token {
-        rust_9cc::Token {
-            kind: rust_9cc::TokenKind::Number(i),
-            ..
-        } => {
+    match token.kind {
+        rust_9cc::TokenKind::Number(i) => {
             return i;
         }
         _ => {
