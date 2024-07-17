@@ -1,4 +1,5 @@
 use crate::rust_9cc::common::{Integer, Operator};
+use crate::rust_9cc::util::print_error_pos;
 
 #[derive(Default)]
 pub struct Tokenizer<'a> {
@@ -27,26 +28,37 @@ impl<'a> Iterator for Tokenizer<'a> {
             return None;
         }
 
-        if let Some((operator, head, _)) = consume_reserved(remain) {
-            self.pos += head.len();
+        if let Some((operator, expr, _)) = consume_reserved(remain) {
+            let pos = self.pos;
+            self.pos += expr.len();
             let kind = TokenKind::Reserved(operator);
-            return Some(Token { kind, expr: head });
+            return Some(Token {
+                kind,
+                code: self.code,
+                pos,
+            });
         }
 
-        if let Some((integer, head, _)) = consume_number(remain) {
-            self.pos += head.len();
+        if let Some((integer, expr, _)) = consume_number(remain) {
+            let pos = self.pos;
+            self.pos += expr.len();
             let kind = TokenKind::Number(integer);
-            return Some(Token { kind, expr: head });
+            return Some(Token {
+                kind,
+                code: self.code,
+                pos,
+            });
         }
 
-        panic!("Error: cannot tokenize: {}", self.expr);
+        print_error_pos(self.code, self.pos, "Error: cannot tokenize");
     }
 }
 
 #[derive(Debug)]
 pub struct Token<'a> {
     pub kind: TokenKind,
-    pub expr: &'a str,
+    pub code: &'a str,
+    pub pos: usize,
 }
 
 #[derive(Debug)]

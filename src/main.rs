@@ -36,9 +36,7 @@ fn main() {
                     println!("  sub rax, {}", expect_number(token));
                 }
             },
-            _ => {
-                panic!("Unexpected token: {:?}", token);
-            }
+            _ => rust_9cc::print_error_pos(token.code, token.pos, "Error: cannot parse"),
         }
     }
 
@@ -50,8 +48,6 @@ fn expect_number(token: rust_9cc::Token) -> rust_9cc::Integer {
         rust_9cc::TokenKind::Number(i) => {
             return i;
         }
-        _ => {
-            panic!("Not a number: {}", token.expr);
-        }
+        _ => rust_9cc::print_error_pos(token.code, token.pos, "Not a number"),
     }
 }
