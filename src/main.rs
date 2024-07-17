@@ -11,7 +11,7 @@ fn main() {
         }
     };
 
-    let mut tokenizer = rust_9cc::Tokenizer { expr: &code };
+    let mut tokenizer = rust_9cc::Tokenizer::from(code.as_str());
 
     println!(".intel_syntax noprefix");
     println!(".globl main");

@@ -1,24 +1,40 @@
 use crate::rust_9cc::common::{Integer, Operator};
 
+#[derive(Default)]
 pub struct Tokenizer<'a> {
-    pub expr: &'a str,
+    code: &'a str,
+    pos: usize,
+}
+
+impl<'a> From<&'a str> for Tokenizer<'a> {
+    fn from(code: &'a str) -> Tokenizer {
+        Self { code: code, pos: 0 }
+    }
 }
 
 impl<'a> Iterator for Tokenizer<'a> {
     type Item = Token<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let index = self.expr.bytes().position(|b| !b.is_ascii_whitespace())?;
-        (_, self.expr) = self.expr.split_at(index);
+        let mut remain;
+        (_, remain) = self.code.split_at(self.pos);
 
-        if let Some((operator, head, tail)) = consume_reserved(self.expr) {
-            self.expr = tail;
+        let index = remain.bytes().position(|b| !b.is_ascii_whitespace())?;
+        (_, remain) = remain.split_at(index);
+        self.pos += index;
+
+        if remain.len() == 0 {
+            return None;
+        }
+
+        if let Some((operator, head, _)) = consume_reserved(remain) {
+            self.pos += head.len();
             let kind = TokenKind::Reserved(operator);
             return Some(Token { kind, expr: head });
         }
 
-        if let Some((integer, head, tail)) = consume_number(self.expr) {
-            self.expr = tail;
+        if let Some((integer, head, _)) = consume_number(remain) {
+            self.pos += head.len();
             let kind = TokenKind::Number(integer);
             return Some(Token { kind, expr: head });
         }
